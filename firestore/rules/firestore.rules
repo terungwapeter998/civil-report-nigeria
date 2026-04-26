@@ -1,0 +1,134 @@
+rules_version = '2';
+
+service cloud.firestore {
+
+  match /databases/{database}/documents {
+
+    /**
+     * =========================================================
+     * SYSTEM INVARIANTS (GLOBAL SECURITY CONTRACT)
+     * =========================================================
+     * I1: Deny by default (no implicit access paths)
+     * I2: Tenant isolation is mandatory, not optional
+     * I3: Ledger is append-only and cryptographically bound
+     * I4: No direct state mutation outside ledger domain
+     * I5: All identity is request-auth derived only
+     */
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated()
+        && request.auth.token.roles.hasAny(['admin']);
+    }
+
+    function isTenantMatch(tenantId) {
+      return isAuthenticated()
+        && request.auth.token.tenantId == tenantId;
+    }
+
+    /**
+     * =========================================================
+     * LEDGER (SOURCE OF TRUTH - IMMUTABLE EVENT STORE)
+     * =========================================================
+     */
+    match /ledger/{tenantId}/events/{eventId} {
+
+      allow read: if isTenantMatch(tenantId) || isAdmin();
+
+      allow create: if isTenantMatch(tenantId)
+
+        // STRICT TENANT BINDING (NO NULL OR INFERENCE)
+        && request.resource.data.tenantId == tenantId
+
+        // ACTOR INTEGRITY (NO SPOOFING)
+        && request.resource.data.actor == request.auth.uid
+
+        // STRUCTURAL CONTRACT ENFORCEMENT
+        && request.resource.data.keys().hasAll([
+          "type",
+          "payload",
+          "actor",
+          "seq",
+          "hash",
+          "prevHash",
+          "tenantId"
+        ])
+
+        // TYPE STABILITY GUARANTEE
+        && request.resource.data.type is string
+        && request.resource.data.seq is int
+
+        // CRYPTO FIELD PRESENCE GUARANTEE (NO FORMAT ASSUMPTIONS)
+        && request.resource.data.hash is string
+        && request.resource.data.prevHash is string
+
+        // IMMUTABLE EVENT CONTRACT
+        && request.resource.data.tenantId == tenantId;
+
+      // ABSOLUTE IMMUTABILITY
+      allow update, delete: if false;
+    }
+
+    /**
+     * =========================================================
+     * EVIDENCE (FORENSIC STORAGE LAYER)
+     * =========================================================
+     */
+    match /evidence/{tenantId}/records/{id} {
+
+      allow read: if isTenantMatch(tenantId) || isAdmin();
+
+      allow create: if isTenantMatch(tenantId)
+
+        && request.resource.data.tenantId == tenantId
+        && request.resource.data.hash is string
+        && request.resource.data.payload != null
+        && request.resource.data.createdAt is timestamp;
+
+      // IMMUTABLE FORENSIC RECORDS
+      allow update, delete: if false;
+    }
+
+    /**
+     * =========================================================
+     * TENANT DOMAIN DATA (NON-LEDGER STATE IS STILL BOUNDARY-ISOLATED)
+     * =========================================================
+     */
+    match /tenants/{tenantId}/{document=**} {
+
+      allow read: if isTenantMatch(tenantId) || isAdmin();
+
+      allow create, update: if isTenantMatch(tenantId)
+
+        && request.resource.data.tenantId == tenantId;
+
+      allow delete: if isAdmin();
+    }
+
+    /**
+     * =========================================================
+     * USER DOMAIN (EVENT-SOURCED OWNERSHIP MODEL ENFORCED)
+     * =========================================================
+     */
+    match /users/{userId} {
+
+      allow read: if isAuthenticated()
+        && request.auth.uid == userId;
+
+      // NO DIRECT MUTATION PATHS (FORCES EVENT SYSTEM USAGE)
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * =========================================================
+     * GLOBAL FAIL-CLOSE RULE (CRITICAL SAFETY NET)
+     * =========================================================
+     */
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

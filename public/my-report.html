@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Reports - Citizens' Assemly North Central</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;600&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-navy: #0b1220;
+            --accent-green: #22c55e;
+            --text-slate: #94a3b8;
+            --card: #111827;
+            --border: #1f2937;
+            --glass: rgba(17, 24, 39, 0.85);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top right, #111827, #000);
+            background-attachment: fixed;
+            color: white;
+            min-height: 100vh;
+            padding-top: 100px;
+            /* Space for fixed navbar */
+            box-sizing: border-box;
+        }
+
+        /* Top Navigation Bar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            box-sizing: border-box;
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+        }
+
+        .logo-container img {
+            height: 40px;
+            display: block;
+        }
+
+        .menu-trigger {
+            background: none;
+            border: 1px solid var(--border);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 13px;
+        }
+
+        .menu-trigger:hover {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        /* Main Container */
+        .auth-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h2 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .subtext {
+            color: var(--text-slate);
+            font-size: 15px;
+            margin-bottom: 40px;
+        }
+
+        /* Report List Styles */
+        .report-list {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            min-height: 200px;
+        }
+
+        .loading {
+            padding: 60px;
+            text-align: center;
+            color: var(--accent-green);
+            font-family: monospace;
+            letter-spacing: 1px;
+        }
+
+        /* Ledger Meta Footer */
+        .ledger-meta {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(34, 197, 94, 0.05);
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-green);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #ledgerStatus {
+            font-family: monospace;
+            color: var(--accent-green);
+            text-transform: uppercase;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        /* Styles for dynamically injected items (for your JS) */
+        .report-item {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.2s;
+        }
+
+        .report-item:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .report-info h4 {
+            margin: 0 0 5px 0;
+            color: white;
+        }
+
+        .report-info p {
+            margin: 0;
+            font-size: 13px;
+            color: var(--text-slate);
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            background: var(--border);
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="assets/image/logo.png" alt="Civic System Logo">
+        </div>
+        <button class="menu-trigger" onclick="location.href='menu.html'">MENU</button>
+    </nav>
+
+    <main class="auth-container">
+
+        <h2>My Reports</h2>
+
+        <p class="subtext">
+            View all reports you have submitted. Data is sourced from the civic ledger.
+        </p>
+
+        <input type="hidden" id="viewType" value="USER_REPORT_LEDGER_VIEW" />
+        <input type="hidden" id="tenant" value="civic-nigeria" />
+
+        <section id="reportList" class="report-list">
+
+            <div class="loading" id="loadingState">
+                [ SYSTEM_SCAN ]: Fetching append-only records...
+            </div>
+
+        </section>
+
+        <div class="ledger-meta">
+            <small id="ledgerStatus">
+                LOG_STATUS: APPEND_ONLY | INTEGRITY: VERIFIED
+            </small>
+            <img src="https://img.icons8.com/ios-glyphs/20/22c55e/checked-user-male.png" alt="Verified">
+        </div>
+
+    </main>
+
+    <script type="module" src="./js/myReports.js"></script>
+
+</body>
+
+</html>

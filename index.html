@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - Citizens' Assembly North Central</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;600&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --accent-green: #22c55e;
+            --error-red: #ef4444;
+            --text: #cbd5e1;
+            --card: #111827;
+            --border: #1f2937;
+            --glass: rgba(17, 24, 39, 0.85);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at center, #111827, #000);
+            background-attachment: fixed;
+            color: white;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            box-sizing: border-box;
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+        }
+
+        .logo-container img {
+            height: 35px;
+            display: block;
+        }
+
+        .auth-container {
+            background: var(--card);
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            z-index: 10;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .auth-container.processing {
+            opacity: 0.6;
+            pointer-events: none;
+            transform: scale(0.98);
+        }
+
+        h2 {
+            font-family: 'Montserrat';
+            font-size: 1.8rem;
+            margin: 0 0 8px 0;
+        }
+
+        .subtext {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        .form {
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #64748b;
+            font-weight: 700;
+        }
+
+        input {
+            background: #0b1220;
+            border: 1px solid var(--border);
+            padding: 14px;
+            border-radius: 6px;
+            color: white;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--accent-green);
+        }
+
+        .btn.primary {
+            margin-top: 10px;
+            background: var(--accent-green);
+            color: #000;
+            border: none;
+            padding: 16px;
+            border-radius: 6px;
+            font-weight: 800;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: 0.3s;
+        }
+
+        .btn.primary:disabled {
+            background: #166534;
+            cursor: not-allowed;
+        }
+
+        .msg {
+            font-size: 13px;
+            margin-top: 15px;
+            min-height: 20px;
+            font-weight: 600;
+        }
+
+        .switch {
+            margin-top: 25px;
+            font-size: 14px;
+            color: #94a3b8;
+        }
+
+        .switch a {
+            color: var(--accent-green);
+            text-decoration: none;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="assets/image/logo.png" alt="Civic System Logo">
+        </div>
+        <div class="nav-actions">
+            <a href="index.html"
+                style="color: var(--text); text-decoration: none; font-size: 13px; font-weight: 600; margin-right: 20px;">HOME</a>
+        </div>
+    </nav>
+
+    <main class="auth-container" id="authBox">
+        <h2>Citizen Login</h2>
+        <p class="subtext">Secure access to the North Central Assembly.</p>
+
+        <form id="loginForm" class="form">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" required placeholder="name@example.com" autocomplete="username" />
+
+            <label for="password">Security Password</label>
+            <input type="password" id="password" required placeholder="••••••••" autocomplete="current-password" />
+
+            <button type="submit" class="btn primary" id="authBtn">SECURE LOGIN</button>
+            <p id="msg" class="msg"></p>
+        </form>
+
+        <p class="switch">
+            New Citizen? <a href="public/register.html">Create an identity</a>
+        </p>
+    </main>
+
+    <script type="module">
+        /* Path updated to point to the js folder in the root */
+        import { auth, db } from './js/firebase-config.js';
+        import { signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const loginForm = document.getElementById('loginForm');
+        const authBox = document.getElementById('authBox');
+        const msgDisplay = document.getElementById('msg');
+        const authBtn = document.getElementById('authBtn');
+
+        async function logAuthEvent(uid, email, status) {
+            try {
+                const eventId = `LOG-${Date.now()}-${uid.substring(0, 5)}`;
+                await setDoc(doc(db, "ledger/civic-nigeria/events", eventId), {
+                    type: "CITIZEN_AUTH",
+                    userId: uid,
+                    email: email,
+                    status: status,
+                    timestamp: serverTimestamp(),
+                    description: `Auth sequence ${status} for citizen account.`
+                });
+            } catch (e) {
+                console.error("Ledger sync failure:", e);
+            }
+        }
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            authBox.classList.add('processing');
+            authBtn.disabled = true;
+            msgDisplay.textContent = "ESTABLISHING SECURE TUNNEL...";
+            msgDisplay.style.color = "var(--accent-green)";
+
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                msgDisplay.textContent = "VERIFYING CITIZEN STATUS...";
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+
+                if (userDoc.exists() && (userDoc.data().role === 'CITIZEN' || userDoc.data().role === 'ADMIN')) {
+                    await logAuthEvent(user.uid, email, "SUCCESS");
+                    msgDisplay.textContent = "ACCESS GRANTED. SYNCING...";
+                    setTimeout(() => {
+                        window.location.replace("menu.html");
+                    }, 1200);
+                } else {
+                    throw new Error("UNAUTHORIZED_IDENTITY");
+                }
+
+            } catch (error) {
+                console.error("Auth Exception:", error.code);
+                await signOut(auth);
+                await logAuthEvent("ANONYMOUS", email, "DENIED");
+
+                let displayErr = "ERROR: INVALID CREDENTIALS";
+                if (error.message === "UNAUTHORIZED_IDENTITY") {
+                    displayErr = "ERROR: CITIZEN RECORD NOT FOUND";
+                }
+
+                msgDisplay.textContent = displayErr;
+                msgDisplay.style.color = "var(--error-red)";
+                authBox.classList.remove('processing');
+                authBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+
+</html>

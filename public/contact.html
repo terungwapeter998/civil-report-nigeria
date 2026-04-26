@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact - CivicReport Nigeria</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;600&display=swap"
+        rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            color: #333;
+            background-color: #f8fafc;
+            /* Very light gray background */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Top Navigation */
+        .navbar {
+            width: 100%;
+            padding: 20px 40px;
+            box-sizing: border-box;
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 50px;
+        }
+
+        .menu-btn {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 10px 20px;
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            color: #1e293b;
+            transition: 0.2s;
+        }
+
+        .menu-btn:hover {
+            background: #e2e8f0;
+            border-color: #94a3b8;
+        }
+
+        /* Contact Card */
+        .contact-card {
+            max-width: 700px;
+            width: 90%;
+            background: white;
+            padding: 50px;
+            text-align: center;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .name {
+            color: #059669;
+            /* Professional Emerald Green */
+            font-family: 'Montserrat', sans-serif;
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .divider {
+            border-top: 2px solid #000;
+            margin: 20px 0;
+            width: 100%;
+        }
+
+        .address {
+            font-size: 15px;
+            font-weight: 600;
+            font-style: italic;
+            color: #475569;
+            margin-bottom: 25px;
+        }
+
+        .contact-details {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            transition: color 0.2s;
+        }
+
+        a:hover {
+            color: #059669;
+        }
+
+        .official-seal {
+            margin-top: 40px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #94a3b8;
+        }
+
+        @media (max-width: 600px) {
+            .contact-details {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .separator {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <button class="menu-btn" onclick="location.href='index.html'">MENU</button>
+    </nav>
+
+    <div class="contact-card">
+        <div class="name">Abiodun O. Essiet</div>
+        <div class="title">Senior Special Assistant to the President on Community Engagement (North Central)</div>
+
+        <div class="divider"></div>
+
+        <div class="address">
+            Suite No. 07.22, beside the Ministry of Niger Delta 7th floor, Federal Secretariat Phase 1, FCT, Nigeria
+        </div>
+
+        <div class="contact-details">
+            <div class="contact-item">
+                <img src="public/assets/image/phone-icon.png" alt="Phone" class="icon">
+                <span>+2348060686872</span>
+            </div>
+
+            <div class="separator" style="border-left: 1px solid #cbd5e1; height: 25px;"></div>
+
+            <div class="contact-item">
+                <img src="public/assets/image/email-icon.png" alt="Email" class="icon">
+                <a href="mailto:abiodun.essiet@statehouse.gov.ng">abiodun.essiet@statehouse.gov.ng</a>
+            </div>
+        </div>
+
+        <div class="official-seal">Official Government Correspondence</div>
+    </div>
+
+</body>
+
+</html>

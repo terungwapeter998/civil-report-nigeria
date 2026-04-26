@@ -1,0 +1,66 @@
+{
+    "indexes": [
+        /**
+     * LEDGER REPLAY INDEX (THE SOURCE OF TRUTH)
+     * Scope: COLLECTION (Strict Path Isolation)
+     * Purpose: Byte-for-byte state reconstruction
+     */
+        {
+            "collectionGroup": "events",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "seq",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "hash",
+                    "order": "ASCENDING"
+                }
+            ]
+        },
+        /**
+     * EVIDENCE INTEGRITY INDEX
+     * Purpose: Instant verification of a specific block
+     */
+        {
+            "collectionGroup": "events",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "hash",
+                    "order": "ASCENDING"
+                }
+            ]
+        },
+        /**
+     * USER-TENANT BINDING INDEX
+     * Purpose: Enforces I1 (Identity-Tenant cross-validation)
+     */
+        {
+            "collectionGroup": "users",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "uid",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "roles",
+                    "order": "ASCENDING"
+                }
+            ]
+        }
+    ],
+    "fieldOverrides": [
+        /**
+     * BLOCK INDEXING ON SENSITIVE FIELDS
+     * Prevents accidental indexing of PII or large payloads
+     */
+        {
+            "collectionGroup": "events",
+            "fieldPath": "payload",
+            "indexes": []
+        }
+    ]
+}

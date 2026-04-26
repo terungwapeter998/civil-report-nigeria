@@ -1,0 +1,6 @@
+export const AuthState = Object.freeze({
+    UNAUTHENTICATED: "UNAUTHENTICATED",
+    AUTHENTICATED: "AUTHENTICATED",
+    ADMIN: "ADMIN",
+    LOADING: "LOADING"
+});

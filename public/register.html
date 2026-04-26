@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CivicSystem | Create Credentials</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary-navy: #0b1220;
+            --accent-green: #22c55e;
+            --border: #1f2937;
+            --danger: #ef4444;
+            --text-slate: #94a3b8;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at center, #111827, #000);
+            background-attachment: fixed;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .login-card {
+            background: rgba(17, 24, 39, 0.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            padding: 40px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        h2 {
+            font-family: 'Montserrat';
+            margin-bottom: 10px;
+            letter-spacing: -1px;
+        }
+
+        .subtext {
+            color: var(--text-slate);
+            font-size: 0.85rem;
+            margin-bottom: 25px;
+        }
+
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            background: #0b1220;
+            border: 1px solid var(--border);
+            padding: 14px;
+            border-radius: 8px;
+            color: white;
+            margin: 10px 0;
+            box-sizing: border-box;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--accent-green);
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.1);
+        }
+
+        .terms-container {
+            text-align: left;
+            font-size: 0.8rem;
+            margin: 15px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            color: var(--text-slate);
+        }
+
+        .terms-container input {
+            width: auto;
+            margin-top: 3px;
+        }
+
+        .terms-container a {
+            color: var(--accent-green);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: var(--accent-green);
+            color: #000;
+            border: none;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:disabled {
+            background: #166534;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .status-msg {
+            color: var(--danger);
+            font-size: 0.8rem;
+            margin-top: 15px;
+            min-height: 1.2em;
+            font-weight: 600;
+        }
+
+        .footer-link {
+            font-size: 0.8rem;
+            margin-top: 25px;
+            color: var(--text-slate);
+        }
+
+        .footer-link a {
+            color: var(--accent-green);
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-card">
+        <h2>Register Citizen</h2>
+        <p class="subtext">Initialize your North Central digital identity.</p>
+
+        <form id="registerForm">
+            <input type="email" id="regEmail" placeholder="Email Address" required autocomplete="email">
+            <input type="password" id="regPass" placeholder="Security Password (min. 6 chars)" required
+                autocomplete="new-password">
+
+            <div class="terms-container">
+                <input type="checkbox" id="acceptTerms">
+                <label for="acceptTerms">
+                    I agree to the <a href="terms.html" target="_blank">Terms of Reference</a> and consent to
+                    deterministic record-keeping.
+                </label>
+            </div>
+
+            <div class="status-msg" id="statusBox"></div>
+
+            <button type="submit" class="btn-primary" id="regBtn" disabled>CREATE IDENTITY</button>
+        </form>
+
+        <p class="footer-link">
+            Already have an identity? <a href="index.html">Login Here</a>
+        </p>
+    </div>
+
+    <script type="module">
+        import { auth, db } from './js/firebase-config.js';
+        import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const form = document.getElementById('registerForm');
+        const checkbox = document.getElementById('acceptTerms');
+        const regBtn = document.getElementById('regBtn');
+        const statusBox = document.getElementById('statusBox');
+
+        // Logic: Require consent before enabling the button
+        checkbox.addEventListener('change', () => {
+            regBtn.disabled = !checkbox.checked;
+        });
+
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            statusBox.textContent = "";
+
+            // UI LOCK: Prevent double execution
+            regBtn.disabled = true;
+            regBtn.innerText = "INITIALIZING...";
+            statusBox.style.color = "var(--accent-green)";
+            statusBox.textContent = "ESTABLISHING CITIZEN PROTOCOL...";
+
+            const email = document.getElementById('regEmail').value;
+            const pass = document.getElementById('regPass').value;
+
+            try {
+                // 1. Authenticated Identity Creation
+                const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+                const user = userCredential.user;
+
+                statusBox.textContent = "GENERATING INSTITUTIONAL PROFILE...";
+
+                // 2. Structural Profile Creation (Required for RBAC Login)
+                await setDoc(doc(db, "users", user.uid), {
+                    email: email,
+                    role: "CITIZEN",
+                    status: "ACTIVE",
+                    createdAt: serverTimestamp(),
+                    metadata: {
+                        termsAccepted: true,
+                        platform: "CivicReport_NC"
+                    }
+                });
+
+                // 3. Deterministic Ledger Append
+                const eventId = `REG-${Date.now()}-${user.uid.substring(0, 4)}`;
+                await setDoc(doc(db, "ledger/civic-nigeria/events", eventId), {
+                    type: "CITIZEN_REGISTRATION",
+                    userId: user.uid,
+                    email: email,
+                    timestamp: serverTimestamp(),
+                    description: "Citizen identity successfully initialized on-ledger."
+                });
+
+                statusBox.textContent = "IDENTITY VERIFIED. REDIRECTING...";
+
+                setTimeout(() => {
+                    window.location.href = "menu.html";
+                }, 1500);
+
+            } catch (err) {
+                console.error("Critical Fault:", err.code);
+                statusBox.style.color = "var(--danger)";
+
+                // Deterministic Error Mapping
+                let errorMsg = "PROTOCOL ERROR: " + err.message;
+                if (err.code === 'auth/email-already-in-use') {
+                    errorMsg = "ERROR: IDENTITY ALREADY EXISTS";
+                } else if (err.code === 'auth/weak-password') {
+                    errorMsg = "ERROR: CREDENTIAL STRENGTH INSUFFICIENT";
+                }
+
+                statusBox.textContent = errorMsg;
+                regBtn.disabled = false;
+                regBtn.innerText = "CREATE IDENTITY";
+            }
+        };
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Resolved Reports - CivicReport Nigeria</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;600&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-navy: #0b1220;
+            --accent-green: #22c55e;
+            --text-slate: #94a3b8;
+            --card: #111827;
+            --border: #1f2937;
+            --glass: rgba(17, 24, 39, 0.85);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top, #1e293b, #000);
+            background-attachment: fixed;
+            color: white;
+            min-height: 100vh;
+            padding-top: 100px;
+            box-sizing: border-box;
+        }
+
+        /* Top Navigation Bar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            box-sizing: border-box;
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+        }
+
+        .logo-container img {
+            height: 40px;
+            display: block;
+        }
+
+        .menu-trigger {
+            background: none;
+            border: 1px solid var(--border);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 13px;
+        }
+
+        .menu-trigger:hover {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        /* Main Container */
+        .auth-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h2 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .subtext {
+            color: var(--text-slate);
+            font-size: 15px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        /* Resolved List Projection Container */
+        .report-list {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            min-height: 200px;
+            /* Prevents layout jump */
+        }
+
+        /* Loading Animation */
+        .loading {
+            padding: 80px;
+            text-align: center;
+            color: var(--accent-green);
+            font-family: monospace;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 14px;
+        }
+
+        .loading::after {
+            content: "";
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid var(--accent-green);
+            border-top-color: transparent;
+            border-radius: 50%;
+            margin-left: 10px;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Integrity Footer */
+        .ledger-meta {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(34, 197, 94, 0.03);
+            border: 1px dashed var(--border);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #ledgerStatus {
+            font-family: monospace;
+            color: var(--accent-green);
+            font-size: 11px;
+        }
+
+        .copyright {
+            font-size: 12px;
+            color: #475569;
+            text-align: center;
+            margin-top: 30px;
+            padding-bottom: 40px;
+        }
+
+        .copyright b {
+            color: var(--text-slate);
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="assets/image/logo.png" alt="Civic System Logo">
+        </div>
+        <button class="menu-trigger" onclick="location.href='menu.html'">BACK TO MENU</button>
+    </nav>
+
+    <main class="auth-container">
+        <h2>Resolved Reports</h2>
+        <p class="subtext">
+            Verified civic issues marked as <b>RESOLVED</b> in the national civic ledger.
+        </p>
+
+        <input type="hidden" id="viewType" value="RESOLVED_LEDGER_VIEW" />
+        <input type="hidden" id="tenant" value="civic-nigeria" />
+        <input type="hidden" id="stateFilter" value="RESOLVED" />
+
+        <section id="resolvedList" class="report-list">
+            <div class="loading" id="loadingState">
+                [ READ_PROJECTION ]: Synchronising verified events
+            </div>
+        </section>
+
+        <div class="ledger-meta">
+            <small id="ledgerStatus">
+                LEDGER_STATE: RESOLVED_ONLY | APPEND-ONLY VERIFIED VIEW
+            </small>
+            <div style="font-size: 10px; color: #64748b; letter-spacing: 1px;">
+                AUTHENTICITY GUARANTEED VIA MILES CORE ENGINE
+            </div>
+        </div>
+
+        <div class="copyright">
+            <p>&copy; 2026 All rights reserved. <b>Miles Platforms Group</b></p>
+        </div>
+    </main>
+
+    <script type="module" src="./js/resolved.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,49 @@
+{
+    "functions": {
+        "source": "backend",
+        "runtime": "nodejs20",
+        "predeploy": [
+            "npm --prefix backend run lint",
+            "npm --prefix backend run test"
+        ],
+        "ignore": [
+            "node_modules",
+            ".git",
+            "firebase-debug.log",
+            "firestore-debug.log"
+        ]
+    },
+    "firestore": {
+        "rules": "firestore/rules/firestore.rules",
+        "indexes": "firestore/indexes.json"
+    },
+    "hosting": {
+        "public": "public",
+        "ignore": [
+            "firebase.json",
+            "**/.*",
+            "**/node_modules/**"
+        ],
+        "rewrites": [
+            {
+                "source": "/api/**",
+                "function": "api"
+            },
+            {
+                "source": "**",
+                "destination": "/index.html"
+            }
+        ]
+    },
+    "emulators": {
+        "firestore": {
+            "port": 8080
+        },
+        "functions": {
+            "port": 5001
+        },
+        "hosting": {
+            "port": 5000
+        }
+    }
+}

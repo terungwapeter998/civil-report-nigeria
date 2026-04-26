@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Control Plane - CivicReport Nigeria</title>
+
+    <link rel="stylesheet" href="../css/styles.css" />
+
+    <style>
+        :root {
+            --bg-deep: #0b1220;
+            --accent-green: #22c55e;
+            --error-red: #ef4444;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, sans-serif;
+            background: #0b1220;
+            color: white;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            padding: 16px 24px;
+            border-bottom: 1px solid #1f2937;
+        }
+
+        .nav a {
+            color: #94a3b8;
+            margin-left: 12px;
+            text-decoration: none;
+        }
+
+        .nav a:hover {
+            color: white;
+        }
+
+        main {
+            padding: 24px;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .card {
+            background: #111827;
+            padding: 16px;
+            border: 1px solid #1f2937;
+            border-radius: 8px;
+        }
+
+        #loadingScreen {
+            position: fixed;
+            inset: 0;
+            background: #0b1220;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        #errorScreen {
+            color: var(--error-red);
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- LOADING STATE -->
+    <div id="loadingScreen">
+        VERIFYING AUTHORIZATION...
+    </div>
+
+    <!-- ERROR STATE -->
+    <div id="errorScreen" class="hidden">
+        ACCESS DENIED
+    </div>
+
+    <!-- APP -->
+    <div id="app" class="hidden">
+
+        <header class="topbar">
+            <div><strong>CivicReport</strong> Admin</div>
+            <nav class="nav">
+                <a href="../index.html">Home</a>
+                <a href="./dashboard.html">Dashboard</a>
+                <a href="./audit.html">Audit</a>
+                <a href="../resolved.html">Public</a>
+            </nav>
+        </header>
+
+        <main>
+            <h1>Governance Control Dashboard</h1>
+            <p style="color:#94a3b8;">Immutable civic ledger operations</p>
+
+            <div class="grid">
+                <div class="card">
+                    <h3>Total Reports</h3>
+                    <p id="totalReports">--</p>
+                </div>
+
+                <div class="card">
+                    <h3>Pending</h3>
+                    <p id="pendingReports">--</p>
+                </div>
+
+                <div class="card">
+                    <h3>Resolved</h3>
+                    <p id="resolvedReports">--</p>
+                </div>
+
+                <div class="card">
+                    <h3>System Health</h3>
+                    <p id="systemHealth">SYNCING...</p>
+                </div>
+            </div>
+        </main>
+
+    </div>
+
+    <!-- AUTH GATE (SINGLE AUTHORITY) -->
+    <script type="module">
+        import { auth, db } from "../js/firebase.js";
+        import { onAuthStateChanged } from "firebase/auth";
+        import { doc, getDoc } from "firebase/firestore";
+
+        const loading = document.getElementById("loadingScreen");
+        const app = document.getElementById("app");
+        const error = document.getElementById("errorScreen");
+
+        async function verifyAdmin(user) {
+            const snap = await getDoc(doc(db, "users", user.uid));
+
+            return snap.exists() && snap.data().role === "ADMIN";
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+
+            try {
+                if (!user) {
+                    window.location.replace("../login.html");
+                    return;
+                }
+
+                const isAdmin = await verifyAdmin(user);
+
+                if (!isAdmin) {
+                    error.classList.remove("hidden");
+                    loading.classList.add("hidden");
+                    return;
+                }
+
+                // AUTHORIZED → LOAD DASHBOARD
+                loading.classList.add("hidden");
+                app.classList.remove("hidden");
+
+                const { initDashboard } = await import("../js/admin/dashboard.js");
+                initDashboard(user);
+
+            } catch (err) {
+                console.error(err);
+                error.classList.remove("hidden");
+                loading.classList.add("hidden");
+            }
+        });
+    </script>
+
+</body>
+
+</html>

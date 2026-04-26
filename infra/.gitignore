@@ -1,0 +1,87 @@
+# =========================================================
+# STAGE 6 INFRASTRUCTURE IGNORE CONTRACT
+# =========================================================
+# Invariant: ONLY source-of-truth code is versioned
+# Everything else is runtime-derived or secret-bound
+# =========================================================
+
+
+# =========================
+# DEPENDENCIES (SUPPLY CHAIN SURFACE)
+# =========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+
+# =========================
+# ENVIRONMENT SECRETS (CRITICAL)
+# =========================
+.env
+.env.*
+!.env.example
+
+
+# =========================
+# FIREBASE LOCAL ARTIFACTS
+# =========================
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+
+# =========================
+# BUILD OUTPUT (NON-DETERMINISTIC ARTIFACTS)
+# =========================
+dist/
+build/
+out/
+
+
+# =========================
+# FIREBASE EMULATOR STATE
+# =========================
+*.cache
+firebase-cache/
+emulator-data/
+
+
+# =========================
+# LOGS (FORENSIC NOISE CONTROL)
+# =========================
+logs/
+*.log
+
+
+# =========================
+# IDE / SYSTEM FILES
+# =========================
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+
+# =========================
+# TEST ARTIFACTS (RUNTIME GENERATED STATE)
+# =========================
+coverage/
+*.seed
+*.tmp
+
+
+# =========================
+# SECURITY CRITICAL OVERRIDES
+# =========================
+# Prevent accidental commit of service account or keys
+serviceAccountKey.json
+firebase-adminsdk*.json
+
+
+# =========================================================
+# EXPLICIT ALLOWLIST OVERRIDE
+# =========================================================
+# Only this file is allowed:
+# .env.example (safe schema definition only)

@@ -1,0 +1,120 @@
+/**
+ * STAGE 6 EVIDENCE STORAGE LAYER
+ * Cryptographically verifiable persistence boundary
+ */
+
+export const createEvidenceStore = ({ db, hashEngine }) => {
+
+    /**
+     * =========================================================
+     * EVIDENCE SCHEMA ENFORCEMENT
+     * =========================================================
+     */
+    const validateEvidenceShape = (evidence) => {
+        const required = ["id", "tenantId", "type", "payload", "hash", "createdAt"];
+
+        for (const key of required) {
+            if (!(key in evidence)) {
+                throw new Error(`EVIDENCE_SCHEMA_VIOLATION: missing ${key}`);
+            }
+        }
+
+        return true;
+    };
+
+    /**
+     * =========================================================
+     * CANONICAL EVIDENCE HASHING
+     * =========================================================
+     */
+    const computeEvidenceHash = (evidence) => {
+        return hashEngine.hashObject("EVIDENCE", {
+            id: evidence.id,
+            tenantId: evidence.tenantId,
+            type: evidence.type,
+            payload: evidence.payload,
+            createdAt: evidence.createdAt
+        });
+    };
+
+    /**
+     * =========================================================
+     * STORE (APPEND-ONLY WRITE CONTRACT)
+     * =========================================================
+     */
+    const storeEvidence = async (evidence) => {
+
+        validateEvidenceShape(evidence);
+
+        const computedHash = computeEvidenceHash(evidence);
+
+        if (computedHash !== evidence.hash) {
+            throw new Error("EVIDENCE_INTEGRITY_FAILURE: hash mismatch");
+        }
+
+        const ref = db
+            .collection("evidence")
+            .doc(evidence.tenantId)
+            .collection("records")
+            .doc(evidence.id);
+
+        const existing = await ref.get();
+
+        if (existing.exists) {
+            throw new Error("EVIDENCE_IMMUTABILITY_VIOLATION: overwrite attempt");
+        }
+
+        await ref.set(Object.freeze(evidence));
+
+        return {
+            status: "COMMITTED",
+            id: evidence.id,
+            hash: computedHash
+        };
+    };
+
+    /**
+     * =========================================================
+     * RETRIEVAL (READ-ONLY VERIFICATION MODE)
+     * =========================================================
+     */
+    const getEvidence = async (tenantId, id) => {
+        const ref = db
+            .collection("evidence")
+            .doc(tenantId)
+            .collection("records")
+            .doc(id);
+
+        const snap = await ref.get();
+
+        if (!snap.exists) return null;
+
+        const data = snap.data();
+
+        const recomputed = computeEvidenceHash(data);
+
+        if (recomputed !== data.hash) {
+            throw new Error("EVIDENCE_CORRUPTION_DETECTED");
+        }
+
+        return Object.freeze(data);
+    };
+
+    /**
+     * =========================================================
+     * LEDGER CONSISTENCY BRIDGE
+     * =========================================================
+     */
+    const linkToLedger = (event, evidenceId) => {
+        return hashEngine.hashObject("EVIDENCE_LINK", {
+            eventHash: event.hash,
+            evidenceId
+        });
+    };
+
+    return Object.freeze({
+        storeEvidence,
+        getEvidence,
+        linkToLedger
+    });
+};

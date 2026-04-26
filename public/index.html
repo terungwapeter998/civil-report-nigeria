@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CivicSystem | Institutional Infrastructure</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;600&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-navy: #0b1220;
+            --accent-green: #22c55e;
+            --text-slate: #94a3b8;
+            --card-bg: rgba(17, 24, 39, 0.8);
+            --border: #1f2937;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Inter', sans-serif;
+            background: #000;
+            color: white;
+            overflow: hidden;
+        }
+
+        /* BACKGROUND */
+        .bg-overlay {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(11, 18, 32, 0.4) 0%, #000 100%);
+            z-index: 1;
+        }
+
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(100%) brightness(0.4);
+            z-index: 0;
+        }
+
+        /* MAIN CONTENT */
+        .main-wrapper {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .brand-header {
+            margin-bottom: 32px;
+        }
+
+        .brand-header h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2.5rem;
+            margin: 0;
+        }
+
+        .brand-header span {
+            color: var(--accent-green);
+        }
+
+        .brand-header p {
+            color: var(--text-slate);
+            font-size: 0.8rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin: 6px 0 0;
+        }
+
+        /* CARD */
+        .login-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            padding: 36px 40px 32px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 380px;
+        }
+
+        /* TAB SWITCHER */
+        .tab-switcher {
+            display: flex;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 28px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: transparent;
+            color: var(--text-slate);
+            border: none;
+            padding: 10px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .tab-btn.active {
+            background: var(--accent-green);
+            color: #000;
+        }
+
+        /* PANELS */
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        /* INPUTS */
+        input {
+            width: 100%;
+            background: #0b1220;
+            border: 1px solid var(--border);
+            padding: 14px;
+            border-radius: 8px;
+            color: white;
+            margin-bottom: 14px;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            border-color: var(--accent-green);
+        }
+
+        input::placeholder {
+            color: var(--text-slate);
+        }
+
+        /* BUTTONS */
+        .btn-primary {
+            width: 100%;
+            background: var(--accent-green);
+            color: #000;
+            border: none;
+            padding: 16px;
+            border-radius: 8px;
+            font-weight: 800;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.85;
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* STATUS */
+        .status-msg {
+            margin-top: 14px;
+            font-size: 0.8rem;
+            min-height: 1.2em;
+            line-height: 1.5;
+        }
+
+        .status-msg.error {
+            color: #ef4444;
+        }
+
+        .status-msg.info {
+            color: var(--text-slate);
+        }
+
+        .status-msg.success {
+            color: var(--accent-green);
+        }
+
+        .register-note {
+            color: var(--text-slate);
+            font-size: 0.75rem;
+            margin: 0 0 16px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- BACKGROUND -->
+    <div class="bg-overlay"></div>
+    <img src="assets/image/hero-bg.jpg" class="hero-bg" alt="">
+
+    <!-- CONTENT -->
+    <div class="main-wrapper">
+
+        <div class="brand-header">
+            <h1>CIVIC<span>SYSTEM</span></h1>
+            <p>Citizens' Assembly</p>
+        </div>
+
+        <div class="login-card">
+
+            <!-- TAB SWITCHER -->
+            <div class="tab-switcher">
+                <button class="tab-btn active" id="tabLogin" onclick="switchTab('login')">SIGN IN</button>
+                <button class="tab-btn" id="tabRegister" onclick="switchTab('register')">REGISTER</button>
+            </div>
+
+            <!-- LOGIN PANEL -->
+            <div class="panel active" id="panelLogin">
+                <input type="email" id="loginEmail" placeholder="name@civicsystem.ng">
+                <input type="password" id="loginPassword" placeholder="••••••••">
+                <button class="btn-primary" id="loginBtn">INITIALIZE SESSION</button>
+            </div>
+
+            <!-- REGISTER PANEL -->
+            <div class="panel" id="panelRegister">
+                <p class="register-note">New accounts are pending admin approval before access is granted.</p>
+                <input type="text" id="regName" placeholder="Full name">
+                <input type="email" id="regEmail" placeholder="name@civicsystem.ng">
+                <input type="password" id="regPassword" placeholder="Create password (min. 8 chars)">
+                <input type="password" id="regConfirm" placeholder="Confirm password">
+                <button class="btn-primary" id="registerBtn">CREATE ACCOUNT</button>
+            </div>
+
+            <div id="statusMsg" class="status-msg"></div>
+
+        </div>
+
+    </div>
+
+    <script type="module">
+        import { auth, db } from "./src/firebase-config.js";
+        import {
+            signInWithEmailAndPassword,
+            createUserWithEmailAndPassword,
+            updateProfile,
+            signOut,
+            onAuthStateChanged
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import {
+            doc,
+            getDoc,
+            setDoc,
+            serverTimestamp
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // ── DOM refs ──────────────────────────────────────────────────────────
+        const loginEmailEl = document.getElementById("loginEmail");
+        const loginPasswordEl = document.getElementById("loginPassword");
+        const loginBtn = document.getElementById("loginBtn");
+
+        const regNameEl = document.getElementById("regName");
+        const regEmailEl = document.getElementById("regEmail");
+        const regPasswordEl = document.getElementById("regPassword");
+        const regConfirmEl = document.getElementById("regConfirm");
+        const registerBtn = document.getElementById("registerBtn");
+
+        const statusMsg = document.getElementById("statusMsg");
+
+        // ── Helpers ───────────────────────────────────────────────────────────
+        function setStatus(text, type = "info") {
+            statusMsg.textContent = text;
+            statusMsg.className = `status-msg ${type}`;
+        }
+
+        async function isAdminUser(uid) {
+            const snap = await getDoc(doc(db, "users", uid));
+            return snap.exists() && snap.data().role === "ADMIN";
+        }
+
+        // ── Tab switcher (global so onclick= works) ───────────────────────────
+        window.switchTab = (tab) => {
+            document.getElementById("panelLogin").classList.toggle("active", tab === "login");
+            document.getElementById("panelRegister").classList.toggle("active", tab === "register");
+            document.getElementById("tabLogin").classList.toggle("active", tab === "login");
+            document.getElementById("tabRegister").classList.toggle("active", tab === "register");
+            setStatus("", "info");
+        };
+
+        // ── Auth state: redirect existing admin sessions ───────────────────────
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) return;
+            try {
+                if (await isAdminUser(user.uid)) {
+                    window.location.replace("menu.html");
+                } else {
+                    await signOut(auth);
+                }
+            } catch (err) {
+                console.error("Auth state check failed:", err);
+                await signOut(auth);
+            }
+        });
+
+        // ── LOGIN ─────────────────────────────────────────────────────────────
+        loginBtn.addEventListener("click", async () => {
+            const email = loginEmailEl.value.trim();
+            const password = loginPasswordEl.value;
+
+            if (!email || !password) {
+                setStatus("Please enter your email and password.", "error");
+                return;
+            }
+
+            setStatus("Authenticating...", "info");
+            loginBtn.disabled = true;
+
+            try {
+                const { user } = await signInWithEmailAndPassword(auth, email, password);
+
+                if (!(await isAdminUser(user.uid))) {
+                    await signOut(auth);
+                    setStatus("Access denied — admin privileges required.", "error");
+                    return;
+                }
+
+                window.location.replace("menu.html");
+
+            } catch (err) {
+                console.error("Login error:", err);
+                await signOut(auth).catch(() => { });
+
+                const msg =
+                    ["auth/invalid-credential", "auth/wrong-password", "auth/user-not-found"]
+                        .includes(err.code)
+                        ? "Invalid email or password."
+                        : "Login failed. Please try again.";
+
+                setStatus(msg, "error");
+            } finally {
+                loginBtn.disabled = false;
+            }
+        });
+
+        // ── REGISTER ──────────────────────────────────────────────────────────
+        registerBtn.addEventListener("click", async () => {
+            const name = regNameEl.value.trim();
+            const email = regEmailEl.value.trim();
+            const password = regPasswordEl.value;
+            const confirm = regConfirmEl.value;
+
+            if (!name || !email || !password || !confirm) {
+                setStatus("All fields are required.", "error");
+                return;
+            }
+            if (password.length < 8) {
+                setStatus("Password must be at least 8 characters.", "error");
+                return;
+            }
+            if (password !== confirm) {
+                setStatus("Passwords do not match.", "error");
+                return;
+            }
+
+            setStatus("Creating account...", "info");
+            registerBtn.disabled = true;
+
+            try {
+                // Create Firebase Auth user
+                const { user } = await createUserWithEmailAndPassword(auth, email, password);
+
+                // Set display name
+                await updateProfile(user, { displayName: name });
+
+                // Write Firestore user doc — role defaults to USER (pending admin approval)
+                await setDoc(doc(db, "users", user.uid), {
+                    displayName: name,
+                    email: email,
+                    role: "USER",
+                    status: "PENDING",
+                    createdAt: serverTimestamp()
+                });
+
+                // Sign out immediately — access requires admin approval
+                await signOut(auth);
+
+                setStatus("Account created! Awaiting admin approval before you can sign in.", "success");
+
+                // Clear fields
+                regNameEl.value = "";
+                regEmailEl.value = "";
+                regPasswordEl.value = "";
+                regConfirmEl.value = "";
+
+            } catch (err) {
+                console.error("Registration error:", err);
+
+                const msg =
+                    err.code === "auth/email-already-in-use"
+                        ? "An account with this email already exists."
+                        : err.code === "auth/invalid-email"
+                            ? "Please enter a valid email address."
+                            : "Registration failed. Please try again.";
+
+                setStatus(msg, "error");
+            } finally {
+                registerBtn.disabled = false;
+            }
+        });
+    </script>
+
+</body>
+
+</html>
